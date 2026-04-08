@@ -1,26 +1,28 @@
 <div align="center">
 
-![App Network Controller](https://capsule-render.vercel.app/api?type=waving&color=0:0a1628,25:1e3a5f,50:0ea5e9,75:38bdf8,100:7dd3fc&height=220&section=header&text=App%20Network%20Controller&fontSize=50&fontColor=ffffff&fontAlignY=35&desc=%F0%9F%9B%A1%EF%B8%8F%20%D8%AA%D8%AD%D9%83%D9%85%20%D9%83%D8%A7%D9%85%D9%84%20%D8%A8%D8%A7%D9%84%D8%A8%D8%B1%D8%A7%D9%85%D8%AC%20%E2%80%A2%20%D8%AD%D8%B8%D8%B1%20%D8%A7%D9%84%D8%A7%D9%86%D8%AA%D8%B1%D9%86%D8%AA%20%E2%80%A2%20%D9%88%D8%A7%D8%AC%D9%87%D8%A9%20%D8%B1%D8%B3%D9%88%D9%85%D9%8A%D8%A9&descAlignY=58&descAlign=50)
+![App Network Controller](https://capsule-render.vercel.app/api?type=waving&color=0:0a1628,25:1e3a5f,50:0ea5e9,75:38bdf8,100:7dd3fc&height=220&section=header&text=App%20Network%20Controller&fontSize=50&fontColor=ffffff&fontAlignY=35&desc=Block%20Apps%20From%20Internet%20%E2%80%A2%20WPF%20Dark%20GUI%20%E2%80%A2%20Windows%20Firewall&descAlignY=55&descAlign=50)
 
-[![Version](https://img.shields.io/badge/%F0%9F%94%96_Version-2.0-0ea5e9?style=for-the-badge&logoColor=white)](#)
-[![PowerShell](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F_PowerShell-5.1+-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](#-المتطلبات)
-[![Windows](https://img.shields.io/badge/%F0%9F%96%A5%EF%B8%8F_Windows-10%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](#-المتطلبات)
-[![WPF](https://img.shields.io/badge/%F0%9F%8E%A8_GUI-WPF%20Dark%20Theme-38bdf8?style=for-the-badge&logoColor=white)](#-المميزات)
-[![Falcon01](https://img.shields.io/badge/%F0%9F%A6%85_Falcon01-Developer-1e3a5f?style=for-the-badge&logoColor=white)](https://github.com/F2lcon01)
+[![Version](https://img.shields.io/badge/Version-2.0-0ea5e9?style=for-the-badge)](https://github.com/F2lcon01/Block-apps-internet)
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/F2lcon01/Block-apps-internet)
+[![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/F2lcon01/Block-apps-internet)
+[![WPF](https://img.shields.io/badge/GUI-WPF%20Dark%20Theme-38bdf8?style=for-the-badge)](https://github.com/F2lcon01/Block-apps-internet)
+[![Falcon01](https://img.shields.io/badge/Falcon01-Developer-1e3a5f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/F2lcon01)
 
-<br>
+</div>
+
+---
+
+<div align="center">
 
 ### التشغيل السريع
+
+</div>
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 ```
 
-او دبل كلك على `AppNetworkController.bat`
-
-<br>
-
-</div>
+> او **دبل كلك** على ملف `AppNetworkController.bat`
 
 ---
 
@@ -28,291 +30,199 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 
 | # | القسم | الوصف |
 |:-:|-------|-------|
-| 1 | [نظرة عامة](#-نظرة-عامة) | ايش يسوي البرنامج ولمن |
-| 2 | [المميزات](#-المميزات) | كل الخصائص بالتفصيل |
-| 3 | [طريقة التشغيل](#-طريقة-التشغيل) | خطوات التثبيت والتشغيل |
-| 4 | [شرح الواجهة](#-شرح-الواجهة) | شرح كل قسم في البرنامج |
-| 5 | [البنية التقنية](#-البنية-التقنية) | كيف يشتغل البرنامج من الداخل |
-| 6 | [المتطلبات](#-المتطلبات) | ايش تحتاج عشان يشتغل |
-| 7 | [الملفات](#-الملفات) | شرح كل ملف في المشروع |
+| 1 | [نظرة عامة](#نظرة-عامة) | ايش يسوي البرنامج ولمن |
+| 2 | [المميزات](#المميزات) | كل الخصائص بالتفصيل |
+| 3 | [طريقة التشغيل](#طريقة-التشغيل) | خطوات التثبيت والتشغيل |
+| 4 | [شرح الواجهة](#شرح-الواجهة) | شرح كل قسم في البرنامج |
+| 5 | [البنية التقنية](#البنية-التقنية) | كيف يشتغل البرنامج من الداخل |
+| 6 | [المتطلبات](#المتطلبات) | ايش تحتاج عشان يشتغل |
+| 7 | [الملفات](#الملفات) | شرح كل ملف في المشروع |
 
 ---
-
-<div align="center">
 
 ## نظرة عامة
 
-</div>
-
-> **App Network Controller** برنامج يتحكم بوصول البرامج للإنترنت عن طريق قواعد Windows Firewall.
-> بضغطة زر تقدر تحظر أي برنامج من الاتصال بالإنترنت — أو تلغي الحظر.
+**App Network Controller** برنامج يتحكم بوصول البرامج للانترنت عن طريق قواعد Windows Firewall.
+بضغطة زر تقدر تحظر اي برنامج من الاتصال بالانترنت - او تلغي الحظر.
 
 ```
-  ┌─────────────────────────────────────────────────────────────────┐
-  │                                                                 │
-  │   🛡️  App Network Controller v2.0                              │
-  │                                                                 │
-  │   ✅  حظر البرامج من الإنترنت بنقرة واحدة                      │
-  │   ✅  واجهة رسومية حديثة (Dark Theme)                           │
-  │   ✅  كشف البرامج المثبتة تلقائياً من Registry                  │
-  │   ✅  تصدير واستيراد قواعد الحظر (JSON)                         │
-  │   ✅  سجل عمليات كامل (Log)                                     │
-  │   ✅  يطلب صلاحيات المسؤول تلقائياً                             │
-  │                                                                 │
-  └─────────────────────────────────────────────────────────────────┘
+  +---------------------------------------------------------------+
+  |                                                                 |
+  |   App Network Controller v2.0                                   |
+  |                                                                 |
+  |   [+] حظر البرامج من الانترنت بنقرة واحدة                      |
+  |   [+] واجهة رسومية حديثة (Dark Theme)                           |
+  |   [+] كشف البرامج المثبتة تلقائيا من Registry                   |
+  |   [+] تصدير واستيراد قواعد الحظر (JSON)                         |
+  |   [+] سجل عمليات كامل (Log)                                     |
+  |   [+] يطلب صلاحيات المسؤول تلقائيا                              |
+  |                                                                 |
+  +---------------------------------------------------------------+
 ```
 
 > [!TIP]
-> البرنامج مفيد جداً لحظر البرامج بعد تثبيتها — مثل منع التطبيقات من إرسال بيانات أو التحديث التلقائي.
+> البرنامج مفيد جدا لحظر البرامج بعد تثبيتها - مثل منع التطبيقات من ارسال بيانات او التحديث التلقائي.
 
 ---
-
-<div align="center">
 
 ## المميزات
 
-</div>
-
 ---
 
-<div align="center">
+### 1 - حظر البرامج الشغالة (Running Apps)
 
-### 1️⃣ حظر البرامج الشغالة — Running Apps
+عرض جميع البرامج الشغالة حاليا مع حالة كل برنامج (محظور / مسموح):
 
-</div>
-
-> عرض جميع البرامج الشغالة حالياً مع حالة كل برنامج (محظور / مسموح):
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │  📋 Running Apps                                             │
-  │                                                              │
-  │  Name              Path                        Status        │
-  │  ─────────────     ───────────────────────     ──────        │
-  │  chrome            C:\Program Files\Google..   🟢 Allowed    │
-  │  discord           C:\Users\...\Discord..      🔴 Blocked    │
-  │  spotify           C:\Users\...\Spotify..      🟢 Allowed    │
-  │                                                              │
-  │  🔄 Refresh    🔍 Search: [_______________]                  │
-  │                                                              │
-  │  📌 دبل كلك على أي برنامج = حظر / إلغاء حظر                │
-  │  📌 كلك يمين = قائمة الخيارات                                │
-  └──────────────────────────────────────────────────────────────┘
-```
+- **دبل كلك** على اي برنامج = حظر او الغاء حظر
+- **كلك يمين** = قائمة الخيارات
+- **خانة البحث** = فلترة فورية بالاسم او المسار
+- **Refresh** = تحديث القائمة
 
 > [!NOTE]
-> البرامج النظامية (مثل `svchost`, `explorer`, `lsass`) محمية ولا يمكن حظرها.
+> البرامج النظامية مثل `svchost` و `explorer` و `lsass` محمية ولا يمكن حظرها.
 
 ---
 
-<div align="center">
+### 2 - كشف البرامج المثبتة (Installed Apps)
 
-### 2️⃣ كشف البرامج المثبتة — Installed Apps
+يفحص الـ Registry ويعرض كل البرامج المثبتة على الجهاز - حتى لو مو شغالة حاليا.
 
-</div>
-
-> يفحص الـ Registry ويعرض كل البرامج المثبتة على الجهاز — حتى لو مو شغالة حالياً:
-
-```
-  📡  مصادر الكشف:
-      ├── HKLM\SOFTWARE\...\Uninstall         → البرامج 64-bit
-      ├── HKLM\SOFTWARE\WOW6432Node\...\      → البرامج 32-bit
-      └── HKCU\SOFTWARE\...\Uninstall         → برامج المستخدم الحالي
-```
+**مصادر الكشف:**
+- `HKLM\SOFTWARE\...\Uninstall` - البرامج 64-bit
+- `HKLM\SOFTWARE\WOW6432Node\...\Uninstall` - البرامج 32-bit
+- `HKCU\SOFTWARE\...\Uninstall` - برامج المستخدم الحالي
 
 > [!TIP]
-> اضغط **Scan** لفحص البرامج المثبتة. الفحص يأخذ لحظات لأنه يمر على كل الـ Registry.
+> اضغط **Scan** لفحص البرامج المثبتة. الفحص ياخذ لحظات لانه يمر على كل الـ Registry.
 
 ---
 
-<div align="center">
+### 3 - ادارة البرامج المحظورة (Blocked Apps)
 
-### 3️⃣ إدارة البرامج المحظورة — Blocked Apps
+عرض جميع قواعد الحظر الموجودة مع امكانية:
 
-</div>
+| الزر | الوظيفة |
+|------|---------|
+| **Refresh** | تحديث قائمة المحظورات |
+| **Unblock All** | الغاء حظر كل البرامج دفعة واحدة (مع تاكيد) |
+| **Export** | حفظ كل القواعد في ملف JSON (للنقل لجهاز ثاني) |
+| **Import** | استيراد قواعد من ملف JSON وتطبيقها |
 
-> عرض جميع قواعد الحظر الموجودة مع إمكانية:
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │  🚫 Blocked Apps                                             │
-  │                                                              │
-  │  🔄 Refresh   ✅ Unblock All   📤 Export   📥 Import        │
-  │                                                              │
-  │  Name         Path                  Direction    Rule        │
-  │  ─────        ────                  ─────────    ────        │
-  │  discord      C:\...\discord.exe    Outbound     AppBlocker_ │
-  │  discord      C:\...\discord.exe    Inbound      AppBlocker_ │
-  │                                                              │
-  │  📌 دبل كلك = إلغاء حظر مع تأكيد                           │
-  └──────────────────────────────────────────────────────────────┘
-```
-
-> [!IMPORTANT]
-> - **Export** — يحفظ كل القواعد في ملف JSON (للنقل لجهاز ثاني)
-> - **Import** — يستورد قواعد من ملف JSON ويطبقها
-> - **Unblock All** — يزيل كل قواعد الحظر دفعة واحدة (مع تأكيد)
+> دبل كلك على اي قاعدة = الغاء حظرها مع تاكيد
 
 ---
 
-<div align="center">
+### 4 - حظر بالمسار (Block by Path)
 
-### 4️⃣ حظر بالمسار — Block by Path
+حظر اي ملف `.exe` مباشرة عن طريق المسار او زر **Browse**:
 
-</div>
-
-> حظر أي ملف `.exe` مباشرة عن طريق المسار أو زر Browse:
-
-```
-  ┌──────────────────────────────────────────────────────────────┐
-  │  📂 Block by Path                                            │
-  │                                                              │
-  │  المسار: [C:\Program Files\App\app.exe    ] [Browse...]      │
-  │                                                              │
-  │  الاسم المكتشف: app                                          │
-  │                                                              │
-  │  [🚫 Block This Application]                                 │
-  │                                                              │
-  │  ─── Recent Blocks ───                                       │
-  │  app1    C:\...\app1.exe                                     │
-  │  app2    C:\...\app2.exe                                     │
-  └──────────────────────────────────────────────────────────────┘
-```
+1. اضغط **Browse** واختر ملف `.exe`
+2. الاسم يكتشف تلقائيا من اسم الملف
+3. اضغط **Block This Application**
 
 > [!TIP]
-> مفيد لحظر برامج مو شغالة حالياً وما تظهر في Running Apps — اختر الملف مباشرة.
+> مفيد لحظر برامج مو شغالة حاليا وما تظهر في Running Apps - اختر الملف مباشرة.
 
 ---
 
-<div align="center">
+### 5 - سجل العمليات (Logs)
 
-### 5️⃣ سجل العمليات — Logs
-
-</div>
-
-> كل عملية حظر أو إلغاء حظر تُسجّل مع الوقت والتاريخ:
+كل عملية حظر او الغاء حظر تسجل مع الوقت والتاريخ:
 
 ```
-  [2026-04-08 05:51:02] === App Network Controller v2.0 started ===
-  [2026-04-08 05:51:15] BLOCKED | chrome | C:\...\chrome.exe
-  [2026-04-08 05:52:03] UNBLOCKED | chrome | 2 rules
-  [2026-04-08 05:53:00] EXPORTED | 4 rules to backup.json
+[2026-04-08 05:51:02] === App Network Controller v2.0 started ===
+[2026-04-08 05:51:15] BLOCKED | chrome | C:\...\chrome.exe
+[2026-04-08 05:52:03] UNBLOCKED | chrome | 2 rules
+[2026-04-08 05:53:00] EXPORTED | 4 rules to backup.json
 ```
 
----
-
-<div align="center">
-
-### 6️⃣ الإعدادات — Settings
-
-</div>
-
-> - تصدير واستيراد القواعد
-> - عرض قائمة العمليات النظامية المحمية
-> - معلومات عن البرنامج
+- **Refresh** = تحديث السجل
+- **Clear** = مسح السجل بالكامل
 
 ---
 
-<div align="center">
+### 6 - الاعدادات (Settings)
+
+- تصدير واستيراد القواعد
+- عرض قائمة العمليات النظامية المحمية
+- معلومات عن البرنامج
+
+---
 
 ## طريقة التشغيل
 
-</div>
+### الطريقة 1 - دبل كلك (الاسهل)
 
----
+| الخطوة | الشرح |
+|--------|-------|
+| **1** | دبل كلك على `AppNetworkController.bat` |
+| **2** | تظهر نافذة UAC - اضغط **Yes** |
+| **3** | البرنامج يفتح بواجهة رسومية مباشرة |
 
-<div align="center">
-
-### الطريقة 1 — دبل كلك (الأسهل)
-
-</div>
-
-```
-  🟡 الخطوة 1 ──→  دبل كلك على AppNetworkController.bat
-  
-  🟡 الخطوة 2 ──→  تظهر نافذة UAC — اضغط Yes (نعم)
-  
-  🟢 النتيجة  ──→  البرنامج يفتح بواجهة رسومية مباشرة
-```
-
----
-
-<div align="center">
-
-### الطريقة 2 — من Terminal
-
-</div>
+### الطريقة 2 - من Terminal
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 ```
 
 > [!WARNING]
-> البرنامج يحتاج **صلاحيات المسؤول (Administrator)** — إذا شغلته بدون صلاحيات، يطلبها تلقائياً عبر نافذة UAC.
+> البرنامج يحتاج **صلاحيات المسؤول (Administrator)** - اذا شغلته بدون صلاحيات يطلبها تلقائيا عبر نافذة UAC.
 
 ---
 
-<div align="center">
-
 ## شرح الواجهة
 
-</div>
-
-> الواجهة مقسمة لعدة أجزاء رئيسية:
+الواجهة مقسمة لعدة اجزاء رئيسية:
 
 ```
-  ┌──────────────────────────────────────────────────────────────┐
-  │  🛡️ App Network Controller v2.0                    🟢 Ready │
-  ├───────────────┬──────────────────────────────────────────────┤
-  │               │                                              │
-  │  📋 Running   │     [ محتوى القسم المختار ]                  │
-  │  💿 Installed │                                              │
-  │  🚫 Blocked   │     DataGrid مع البيانات                     │
-  │  📂 By Path   │     + أزرار التحكم                           │
-  │  📊 Logs      │     + خانة البحث                             │
-  │  ⚙️ Settings  │                                              │
-  │               │                                              │
-  ├───────────────┴──────────────────────────────────────────────┤
-  │  Ready                                            05:51:02   │
-  └──────────────────────────────────────────────────────────────┘
+  +---------------+----------------------------------------------+
+  |  App Network Controller v2.0                      [*] Ready  |
+  +---------------+----------------------------------------------+
+  |               |                                              |
+  |  Running Apps |     [ محتوى القسم المختار ]                  |
+  |  Installed    |                                              |
+  |  Blocked      |     DataGrid مع البيانات                     |
+  |  By Path      |     + ازرار التحكم                           |
+  |  Logs         |     + خانة البحث                             |
+  |  Settings     |                                              |
+  |               |                                              |
+  +---------------+----------------------------------------------+
+  |  Ready                                            05:51:02   |
+  +--------------------------------------------------------------+
 ```
 
 | القسم | الوظيفة | طريقة الاستخدام |
 |-------|---------|----------------|
-| **📋 Running Apps** | البرامج الشغالة حالياً | دبل كلك لحظر/إلغاء حظر |
-| **💿 Installed Apps** | كل البرامج المثبتة | اضغط Scan ثم دبل كلك |
-| **🚫 Blocked Apps** | القواعد المحظورة | دبل كلك لإلغاء حظر + Export/Import |
-| **📂 Block by Path** | حظر بمسار الملف | Browse واختر الملف ثم Block |
-| **📊 Logs** | سجل العمليات | Refresh لتحديث + Clear لمسح |
-| **⚙️ Settings** | إعدادات وتصدير | Export/Import + عرض Whitelist |
+| **Running Apps** | البرامج الشغالة حاليا | دبل كلك لحظر/الغاء حظر |
+| **Installed Apps** | كل البرامج المثبتة | اضغط Scan ثم دبل كلك |
+| **Blocked Apps** | القواعد المحظورة | دبل كلك لالغاء حظر + Export/Import |
+| **Block by Path** | حظر بمسار الملف | Browse واختر الملف ثم Block |
+| **Logs** | سجل العمليات | Refresh لتحديث + Clear لمسح |
+| **Settings** | اعدادات وتصدير | Export/Import + عرض Whitelist |
 
 > [!TIP]
-> **البحث**: كل تبويب فيه خانة بحث — اكتب اسم البرنامج وتتصفى القائمة فوراً.
+> **البحث**: كل تبويب فيه خانة بحث - اكتب اسم البرنامج وتتصفى القائمة فورا.
 
 ---
 
-<div align="center">
-
 ## البنية التقنية
-
-</div>
 
 ```mermaid
 graph TD
-    A[المستخدم يشغل البرنامج] --> B{صلاحيات Admin?}
-    B -->|لا| C[طلب UAC تلقائي]
+    A["User runs app"] --> B{"Admin?"}
+    B -->|No| C["UAC Prompt"]
     C --> B
-    B -->|نعم| D[تحميل WPF GUI]
-    D --> E[عرض البرامج الشغالة]
+    B -->|Yes| D["Load WPF GUI"]
+    D --> E["Show Running Apps"]
     
-    E --> F{اختيار المستخدم}
-    F -->|حظر| G[إنشاء Firewall Rule]
-    F -->|إلغاء حظر| H[حذف Firewall Rule]
-    F -->|تصدير| I[حفظ JSON]
-    F -->|استيراد| J[قراءة JSON + إنشاء Rules]
+    E --> F{"User Action"}
+    F -->|Block| G["Create Firewall Rule"]
+    F -->|Unblock| H["Remove Firewall Rule"]
+    F -->|Export| I["Save JSON"]
+    F -->|Import| J["Read JSON + Create Rules"]
     
-    G --> K[Inbound + Outbound Block]
-    K --> L[تسجيل في Log]
+    G --> K["Inbound + Outbound Block"]
+    K --> L["Write to Log"]
     H --> L
     I --> L
     J --> L
@@ -332,74 +242,62 @@ graph TD
 ```
 
 > [!NOTE]
-> كل عملية حظر تنشئ **قاعدتين** في Windows Firewall — واحدة Inbound وواحدة Outbound — لضمان حظر كامل.
+> كل عملية حظر تنشئ **قاعدتين** في Windows Firewall - واحدة Inbound وواحدة Outbound - لضمان حظر كامل.
 
 ---
-
-<div align="center">
 
 ## المتطلبات
 
-</div>
-
 | المتطلب | التفاصيل |
 |---------|----------|
-| ![](https://img.shields.io/badge/-Windows%2010%2F11-0078D4?style=flat-square&logo=windows&logoColor=white) | Windows 10 أو Windows 11 |
-| ![](https://img.shields.io/badge/-PowerShell%205.1+-5391FE?style=flat-square&logo=powershell&logoColor=white) | مثبت مسبقاً مع Windows |
-| ![](https://img.shields.io/badge/-Administrator-ef4444?style=flat-square&logoColor=white) | صلاحيات المسؤول (يطلبها تلقائياً) |
-| ![](https://img.shields.io/badge/-WPF%20/.NET-512BD4?style=flat-square&logo=dotnet&logoColor=white) | مثبت مسبقاً مع Windows |
+| **نظام التشغيل** | Windows 10 او Windows 11 |
+| **PowerShell** | الاصدار 5.1+ (مثبت مسبقا مع Windows) |
+| **الصلاحيات** | Administrator (يطلبها تلقائيا) |
+| **WPF / .NET** | مثبت مسبقا مع Windows |
 
 > [!IMPORTANT]
-> لا يحتاج تثبيت أي شيء إضافي — كل المتطلبات موجودة مع Windows.
+> لا يحتاج تثبيت اي شيء اضافي - كل المتطلبات موجودة مع Windows.
 
 ---
-
-<div align="center">
 
 ## الملفات
 
-</div>
-
 | الملف | الوظيفة | طريقة التشغيل |
 |-------|---------|--------------|
-| `AppNetworkController.ps1` | البرنامج الرئيسي — واجهة رسومية كاملة | `powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"` |
-| `AppNetworkController.bat` | ملف تشغيل سريع — دبل كلك | **دبل كلك** على الملف مباشرة |
+| `AppNetworkController.ps1` | البرنامج الرئيسي - واجهة رسومية كاملة | من Terminal بالامر اعلاه |
+| `AppNetworkController.bat` | ملف تشغيل سريع | **دبل كلك** على الملف مباشرة |
 
 ```
-  📁 Block-apps-internet/
-      ├── AppNetworkController.ps1    ← البرنامج الرئيسي (واجهة + محرك)
-      ├── AppNetworkController.bat    ← لانشر للتشغيل السريع
-      └── README.md                   ← هذا الملف
+  Block-apps-internet/
+      |-- AppNetworkController.ps1    <- البرنامج الرئيسي (واجهة + محرك)
+      |-- AppNetworkController.bat    <- لانشر للتشغيل السريع
+      |-- README.md                   <- هذا الملف
 ```
 
 > [!CAUTION]
-> لا تحذف ملف `.ps1` — ملف `.bat` يعتمد عليه للتشغيل.
+> لا تحذف ملف `.ps1` - ملف `.bat` يعتمد عليه للتشغيل.
 
 ---
-
-<div align="center">
 
 ### كيف يحظر البرنامج؟
 
-</div>
-
 ```
-  🔴 الحظر:
-      New-NetFirewallRule → AppBlocker_AppName_OUT (Outbound Block)
-      New-NetFirewallRule → AppBlocker_AppName_IN  (Inbound Block)
+  الحظر:
+      New-NetFirewallRule -> AppBlocker_AppName_OUT (Outbound Block)
+      New-NetFirewallRule -> AppBlocker_AppName_IN  (Inbound Block)
 
-  🟢 إلغاء الحظر:
-      Remove-NetFirewallRule → AppBlocker_AppName_OUT
-      Remove-NetFirewallRule → AppBlocker_AppName_IN
+  الغاء الحظر:
+      Remove-NetFirewallRule -> AppBlocker_AppName_OUT
+      Remove-NetFirewallRule -> AppBlocker_AppName_IN
 ```
 
-> جميع القواعد تبدأ بالبادئة `AppBlocker_` — سهلة التعرف عليها في Windows Firewall.
+> جميع القواعد تبدا بالبادئة `AppBlocker_` - سهلة التعرف عليها في Windows Firewall.
 
 ---
 
 <div align="center">
 
-**App Network Controller v2.0** — بقلم Falcon (fox01vip@gmail.com)
+**App Network Controller v2.0**
 
 [![GitHub](https://img.shields.io/badge/GitHub-F2lcon01-1e3a5f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/F2lcon01)
 
