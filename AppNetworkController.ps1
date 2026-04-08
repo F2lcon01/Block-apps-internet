@@ -1,6 +1,6 @@
 ﻿#Requires -Version 5.1
 # ============================================================================
-#  App Network Controller v2.0 - Production GUI
+#  App Network Controller v2.5 - Production GUI
 #  Controls which applications can access the network via Windows Firewall.
 #  Requires: PowerShell 5.1+, Administrator privileges, Windows 10/11.
 # ============================================================================
@@ -17,16 +17,6 @@ if ([Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
     exit
 }
 
-# === HIDE CONSOLE WINDOW (show only GUI) ===
-Add-Type -Name Win32 -Namespace Native -MemberDefinition @'
-    [DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
-    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-'@
-$consoleHwnd = [Native.Win32]::GetConsoleWindow()
-if ($consoleHwnd -ne [IntPtr]::Zero) {
-    [Native.Win32]::ShowWindow($consoleHwnd, 0) | Out-Null  # 0 = SW_HIDE
-}
-
 # === LOAD ASSEMBLIES ===
 Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName PresentationCore
@@ -37,6 +27,7 @@ Add-Type -AssemblyName System.Windows.Forms
 $script:RulePrefix       = "AppBlocker_"
 $script:BaseDir          = "$env:LOCALAPPDATA\AppNetworkController"
 $script:LogFile          = "$script:BaseDir\log.txt"
+$script:FwPolicy         = New-Object -ComObject HNetCfg.FwPolicy2
 
 $script:SystemWhitelist = @(
     'explorer','svchost','winlogon','services','lsass','csrss',
@@ -73,13 +64,11 @@ function Test-SystemProcess {
 function Get-BlockedNamesSet {
     $set = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     try {
-        $allRules = Get-NetFirewallRule -ErrorAction SilentlyContinue
-        if ($null -eq $allRules) { return $set }
-        $matched = @($allRules | Where-Object { $_.DisplayName -like "$($script:RulePrefix)*" })
-        foreach ($r in $matched) {
-            if ($null -eq $r -or $null -eq $r.DisplayName) { continue }
-            $name = ($r.DisplayName -replace [regex]::Escape($script:RulePrefix),'') -replace '_(IN|OUT)$',''
-            if ($name) { $set.Add($name) | Out-Null }
+        foreach ($rule in $script:FwPolicy.Rules) {
+            if ($rule.Name -like "$($script:RulePrefix)*") {
+                $name = ($rule.Name -replace [regex]::Escape($script:RulePrefix),'') -replace '_(IN|OUT)$',''
+                if ($name) { $set.Add($name) | Out-Null }
+            }
         }
     } catch {
         Write-AppLog "Get-BlockedNamesSet error: $_"
@@ -91,8 +80,11 @@ function Test-AppBlocked {
     param([string]$ProcessName)
     try {
         $base = [System.IO.Path]::GetFileNameWithoutExtension($ProcessName)
-        $outRule = Get-NetFirewallRule -DisplayName "$($script:RulePrefix)${base}_OUT" -ErrorAction SilentlyContinue
-        return ($null -ne $outRule)
+        $targetName = "$($script:RulePrefix)${base}_OUT"
+        foreach ($rule in $script:FwPolicy.Rules) {
+            if ($rule.Name -eq $targetName) { return $true }
+        }
+        return $false
     } catch { return $false }
 }
 
@@ -109,13 +101,15 @@ function Get-RunningUserApps {
             -not (Test-SystemProcess $_.ProcessName)
         } | Sort-Object ProcessName -Unique
 
-        return @(foreach ($p in $procs) {
-            [PSCustomObject]@{
+        $list = [System.Collections.ArrayList]::new()
+        foreach ($p in $procs) {
+            [void]$list.Add([PSCustomObject]@{
                 Name   = $p.ProcessName
                 Path   = $p.Path
                 Status = if ($blockedSet.Contains($p.ProcessName)) { "Blocked" } else { "Allowed" }
-            }
-        })
+            })
+        }
+        return @($list)
     } catch {
         Write-AppLog "Get-RunningUserApps error: $_"
         return @()
@@ -132,7 +126,8 @@ function Get-InstalledApps {
             'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
         )
         $seen = @{}
-        return @(foreach ($rp in $regPaths) {
+        $list = [System.Collections.ArrayList]::new()
+        foreach ($rp in $regPaths) {
             $entries = Get-ItemProperty -Path $rp -ErrorAction SilentlyContinue
             foreach ($e in $entries) {
                 if (-not $e.DisplayName) { continue }
@@ -158,14 +153,15 @@ function Get-InstalledApps {
                 $seen[$key] = $true
 
                 $procName = [System.IO.Path]::GetFileNameWithoutExtension($exePath)
-                [PSCustomObject]@{
+                [void]$list.Add([PSCustomObject]@{
                     Name      = $e.DisplayName
                     Path      = $exePath
                     Publisher = if ($e.Publisher) { $e.Publisher } else { "Unknown" }
                     Status    = if ($blockedSet.Contains($procName)) { "Blocked" } else { "Allowed" }
-                }
+                })
             }
-        })
+        }
+        return @($list)
     } catch {
         Write-AppLog "Get-InstalledApps error: $_"
         return @()
@@ -174,20 +170,18 @@ function Get-InstalledApps {
 
 function Get-BlockedAppsList {
     try {
-        $allRules = Get-NetFirewallRule -ErrorAction SilentlyContinue
-        if ($null -eq $allRules) { return @() }
-        $rules = @($allRules | Where-Object { $_.DisplayName -like "$($script:RulePrefix)*" })
-        return @(foreach ($rule in $rules) {
-            $appFilter = $rule | Get-NetFirewallApplicationFilter -ErrorAction SilentlyContinue
-            $progPath  = if ($appFilter -and $appFilter.Program) { $appFilter.Program } else { "Unknown" }
-            $friendly  = ($rule.DisplayName -replace [regex]::Escape($script:RulePrefix),'') -replace '_(IN|OUT)$',''
-            [PSCustomObject]@{
-                Name      = $friendly
-                Path      = $progPath
-                Direction = if ($rule.Direction -eq 'Outbound') { "Outbound" } else { "Inbound" }
-                RuleName  = $rule.DisplayName
+        $results = [System.Collections.ArrayList]::new()
+        foreach ($rule in $script:FwPolicy.Rules) {
+            if ($rule.Name -like "$($script:RulePrefix)*") {
+                $friendly = ($rule.Name -replace [regex]::Escape($script:RulePrefix),'') -replace '_(IN|OUT)$',''
+                $dir = if ($rule.Direction -eq 2) { "Outbound" } else { "Inbound" }
+                [void]$results.Add([PSCustomObject]@{
+                    Name = $friendly; Path = $rule.ApplicationName
+                    Direction = $dir; RuleName = $rule.Name
+                })
             }
-        })
+        }
+        return @($results)
     } catch {
         Write-AppLog "Get-BlockedAppsList error: $_"
         return @()
@@ -227,10 +221,14 @@ function Unblock-Application {
     try {
         $base = [System.IO.Path]::GetFileNameWithoutExtension($Name)
         $removed = 0
-        $out = Get-NetFirewallRule -DisplayName "$($script:RulePrefix)${base}_OUT" -ErrorAction SilentlyContinue
-        if ($out) { $out | Remove-NetFirewallRule -ErrorAction Stop; $removed++ }
-        $in = Get-NetFirewallRule -DisplayName "$($script:RulePrefix)${base}_IN" -ErrorAction SilentlyContinue
-        if ($in) { $in | Remove-NetFirewallRule -ErrorAction Stop; $removed++ }
+        try {
+            Remove-NetFirewallRule -DisplayName "$($script:RulePrefix)${base}_OUT" -ErrorAction Stop
+            $removed++
+        } catch { }
+        try {
+            Remove-NetFirewallRule -DisplayName "$($script:RulePrefix)${base}_IN" -ErrorAction Stop
+            $removed++
+        } catch { }
         if ($removed -eq 0) {
             return [PSCustomObject]@{ Success=$false; Message="No rules found for '$base'." }
         }
@@ -315,7 +313,7 @@ function Clear-AppLog {
     } catch { }
 }
 
-Write-AppLog "=== App Network Controller v2.0 started ==="
+Write-AppLog "=== App Network Controller v2.5 started ==="
 
 # ============================================================================
 #                              WPF GUI (XAML)
@@ -325,7 +323,7 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
 <Window
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="App Network Controller v2.0"
+    Title="App Network Controller v2.5"
     Width="960" Height="680"
     MinWidth="820" MinHeight="600"
     WindowStartupLocation="CenterScreen"
@@ -397,52 +395,6 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="bd" Property="Background" Value="#2E7D32"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SmallDanger" TargetType="Button">
-            <Setter Property="Background" Value="#E53935"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="10,3"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#C62828"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SmallSuccess" TargetType="Button">
-            <Setter Property="Background" Value="#4CAF50"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="10,3"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#388E3C"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -525,6 +477,10 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
             <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="RowHeight" Value="36"/>
             <Setter Property="ColumnHeaderHeight" Value="38"/>
+            <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+            <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+            <Setter Property="EnableColumnVirtualization" Value="True"/>
+            <Setter Property="EnableRowVirtualization" Value="True"/>
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
@@ -579,9 +535,8 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
         <Border Grid.Row="0" Background="#16213E" BorderBrush="#2A2A4A" BorderThickness="0,0,0,1">
             <Grid Margin="16,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="&#x1F6E1;&#xFE0F;" FontSize="22" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Text="App Network Controller" FontSize="20" FontWeight="Bold" Foreground="#E0E0E0" VerticalAlignment="Center"/>
-                    <TextBlock Text="v2.0" FontSize="12" Foreground="#9E9E9E" VerticalAlignment="Center" Margin="10,4,0,0"/>
+                    <TextBlock Text="v2.5" FontSize="12" Foreground="#9E9E9E" VerticalAlignment="Center" Margin="10,4,0,0"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Ellipse x:Name="statusDot" Width="10" Height="10" Fill="#4CAF50" Margin="0,0,8,0"/>
@@ -600,12 +555,12 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
             <!-- SIDEBAR -->
             <Border Grid.Column="0" Background="#16213E" BorderBrush="#2A2A4A" BorderThickness="0,0,1,0">
                 <StackPanel Margin="0,8,0,0">
-                    <Button x:Name="navRunning"   Content="&#x1F4CB;  Running Apps"   Style="{StaticResource NavButtonActive}"/>
-                    <Button x:Name="navInstalled"  Content="&#x1F4BF;  Installed Apps" Style="{StaticResource NavButton}"/>
-                    <Button x:Name="navBlocked"    Content="&#x1F6AB;  Blocked Apps"   Style="{StaticResource NavButton}"/>
-                    <Button x:Name="navBlockPath"  Content="&#x1F4C2;  Block by Path"  Style="{StaticResource NavButton}"/>
-                    <Button x:Name="navLogs"       Content="&#x1F4CA;  Logs"           Style="{StaticResource NavButton}"/>
-                    <Button x:Name="navSettings"   Content="&#x2699;&#xFE0F;  Settings" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="navRunning"   Content="Running Apps"   Style="{StaticResource NavButtonActive}"/>
+                    <Button x:Name="navInstalled"  Content="Installed Apps" Style="{StaticResource NavButton}"/>
+                    <Button x:Name="navBlocked"    Content="Blocked Apps"   Style="{StaticResource NavButton}"/>
+                    <Button x:Name="navBlockPath"  Content="Block by Path"  Style="{StaticResource NavButton}"/>
+                    <Button x:Name="navLogs"       Content="Logs"           Style="{StaticResource NavButton}"/>
+                    <Button x:Name="navSettings"   Content="Settings"       Style="{StaticResource NavButton}"/>
                 </StackPanel>
             </Border>
 
@@ -619,7 +574,8 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button x:Name="btnRefreshRunning" Content="&#x1F504; Refresh" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
+                        <Button x:Name="btnRefreshRunning" Content="Refresh" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
+                        <Button x:Name="btnBlockAllNonSystem" Content="Block All Non-System" Style="{StaticResource DangerButton}" Margin="0,0,10,0"/>
                         <TextBox x:Name="txtSearchRunning" Style="{StaticResource DarkTextBox}" Width="260"/>
                         <TextBlock Text="  Type to search..." Foreground="#666" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" x:Name="phRunning"/>
                     </StackPanel>
@@ -639,7 +595,7 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button x:Name="btnScanInstalled" Content="&#x1F50D; Scan" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
+                        <Button x:Name="btnScanInstalled" Content="Scan" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
                         <TextBox x:Name="txtSearchInstalled" Style="{StaticResource DarkTextBox}" Width="260"/>
                         <TextBlock Text="  Type to search..." Foreground="#666" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" x:Name="phInstalled"/>
                     </StackPanel>
@@ -660,10 +616,10 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <WrapPanel Margin="0,0,0,10">
-                        <Button x:Name="btnRefreshBlocked" Content="&#x1F504; Refresh" Style="{StaticResource BaseButton}" Margin="0,0,10,4"/>
+                        <Button x:Name="btnRefreshBlocked" Content="Refresh" Style="{StaticResource BaseButton}" Margin="0,0,10,4"/>
                         <Button x:Name="btnUnblockAll" Content="Unblock All" Style="{StaticResource SuccessButton}" Margin="0,0,10,4"/>
-                        <Button x:Name="btnExportRules" Content="&#x1F4E4; Export" Style="{StaticResource BaseButton}" Margin="0,0,10,4"/>
-                        <Button x:Name="btnImportRules" Content="&#x1F4E5; Import" Style="{StaticResource BaseButton}" Margin="0,0,0,4"/>
+                        <Button x:Name="btnExportRules" Content="Export" Style="{StaticResource BaseButton}" Margin="0,0,10,4"/>
+                        <Button x:Name="btnImportRules" Content="Import" Style="{StaticResource BaseButton}" Margin="0,0,0,4"/>
                     </WrapPanel>
                     <DataGrid x:Name="dgBlocked" Grid.Row="1" Style="{StaticResource DarkDataGrid}">
                         <DataGrid.Columns>
@@ -691,7 +647,7 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                             </StackPanel>
                             <TextBlock Text="Detected Name:" Foreground="#9E9E9E" FontSize="12" Margin="0,0,0,4"/>
                             <TextBlock x:Name="txtDetectedName" Text="(select a file)" Foreground="#E0E0E0" FontSize="14" Margin="0,0,0,16"/>
-                            <Button x:Name="btnBlockByPath" Content="&#x1F6AB; Block This Application" Style="{StaticResource DangerButton}" FontSize="15" Padding="20,10" HorizontalAlignment="Left"/>
+                            <Button x:Name="btnBlockByPath" Content="Block This Application" Style="{StaticResource DangerButton}" FontSize="15" Padding="20,10" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </Border>
                     <StackPanel Grid.Row="1" Margin="0,4,0,0">
@@ -712,7 +668,7 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                        <Button x:Name="btnRefreshLogs" Content="&#x1F504; Refresh Logs" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
+                        <Button x:Name="btnRefreshLogs" Content="Refresh Logs" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
                         <Button x:Name="btnClearLogs" Content="Clear Log" Style="{StaticResource DangerButton}"/>
                     </StackPanel>
                     <TextBox x:Name="txtLogContent" Grid.Row="1" Style="{StaticResource DarkTextBox}"
@@ -729,8 +685,8 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                                 <StackPanel>
                                     <TextBlock Text="Export / Import Firewall Rules" FontSize="16" FontWeight="SemiBold" Foreground="#E0E0E0" Margin="0,0,0,12"/>
                                     <StackPanel Orientation="Horizontal">
-                                        <Button x:Name="btnSettingsExport" Content="&#x1F4E4; Export Rules" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
-                                        <Button x:Name="btnSettingsImport" Content="&#x1F4E5; Import Rules" Style="{StaticResource BaseButton}"/>
+                                        <Button x:Name="btnSettingsExport" Content="Export Rules" Style="{StaticResource BaseButton}" Margin="0,0,10,0"/>
+                                        <Button x:Name="btnSettingsImport" Content="Import Rules" Style="{StaticResource BaseButton}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -745,9 +701,9 @@ Write-AppLog "=== App Network Controller v2.0 started ==="
                                 <StackPanel>
                                     <TextBlock Text="About" FontSize="16" FontWeight="SemiBold" Foreground="#E0E0E0" Margin="0,0,0,8"/>
                                     <TextBlock Foreground="#9E9E9E" FontSize="12" TextWrapping="Wrap">
-                                        <Run Text="App Network Controller v2.0" FontWeight="SemiBold" Foreground="#E0E0E0"/><LineBreak/>
+                                        <Run Text="App Network Controller v2.5" FontWeight="SemiBold" Foreground="#E0E0E0"/><LineBreak/>
                                         <Run Text="Control which applications can access the network via Windows Firewall."/><LineBreak/><LineBreak/>
-                                        <Run Text="Features: Block/Unblock apps, installed app scanning, gaming mode, rule export/import, logging."/><LineBreak/>
+                                        <Run Text="Features: Block/Unblock apps, installed app scanning, rule export/import, logging."/><LineBreak/>
                                         <Run Text="Requires: PowerShell 5.1+, Administrator privileges, Windows 10/11."/>
                                     </TextBlock>
                                 </StackPanel>
@@ -794,10 +750,11 @@ $panelLogs      = $window.FindName('panelLogs')
 $panelSettings  = $window.FindName('panelSettings')
 
 # Controls
-$btnRefreshRunning  = $window.FindName('btnRefreshRunning')
-$txtSearchRunning   = $window.FindName('txtSearchRunning')
-$phRunning          = $window.FindName('phRunning')
-$dgRunning          = $window.FindName('dgRunning')
+$btnRefreshRunning    = $window.FindName('btnRefreshRunning')
+$btnBlockAllNonSystem = $window.FindName('btnBlockAllNonSystem')
+$txtSearchRunning     = $window.FindName('txtSearchRunning')
+$phRunning            = $window.FindName('phRunning')
+$dgRunning            = $window.FindName('dgRunning')
 
 $btnScanInstalled   = $window.FindName('btnScanInstalled')
 $txtSearchInstalled = $window.FindName('txtSearchInstalled')
@@ -964,6 +921,31 @@ $navSettings.Add_Click({
 # --- Running Apps ---
 $btnRefreshRunning.Add_Click({ Refresh-RunningApps })
 
+$btnBlockAllNonSystem.Add_Click({
+    $apps = @($script:allRunningApps | Where-Object { $_.Status -eq 'Allowed' })
+    if ($apps.Count -eq 0) {
+        [System.Windows.MessageBox]::Show('No non-system apps to block (all are already blocked or none found).','Nothing to Block','OK','Information')
+        return
+    }
+    $ans = [System.Windows.MessageBox]::Show("Block all $($apps.Count) non-system running application(s)?`nThis will create firewall rules for each one.",'Confirm Block All',[System.Windows.MessageBoxButton]::YesNo,[System.Windows.MessageBoxImage]::Warning)
+    if ($ans -eq 'Yes') {
+        $window.Cursor = [System.Windows.Input.Cursors]::Wait
+        $btnBlockAllNonSystem.IsEnabled = $false
+        try {
+            $blocked = 0; $failed = 0
+            foreach ($app in $apps) {
+                $r = Block-Application -Name $app.Name -Path $app.Path
+                if ($r.Success) { $blocked++ } else { $failed++ }
+            }
+            Update-StatusBar "Blocked $blocked app(s), $failed failed"
+            Refresh-RunningApps
+        } finally {
+            $window.Cursor = $null
+            $btnBlockAllNonSystem.IsEnabled = $true
+        }
+    }
+})
+
 $txtSearchRunning.Add_TextChanged({
     $phRunning.Visibility = if ($txtSearchRunning.Text.Length -gt 0) { 'Collapsed' } else { 'Visible' }
     Filter-DataGrid -Text $txtSearchRunning.Text -Source $script:allRunningApps -Grid $dgRunning
@@ -1126,7 +1108,7 @@ $window.Add_Loaded({
 })
 
 $window.Add_Closing({
-    Write-AppLog "=== App Network Controller v2.0 closed ==="
+    Write-AppLog "=== App Network Controller v2.5 closed ==="
 })
 
 $null = $window.ShowDialog()

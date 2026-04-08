@@ -2,7 +2,7 @@
 
 ![App Network Controller](https://capsule-render.vercel.app/api?type=waving&color=0:0a1628,25:1e3a5f,50:0ea5e9,75:38bdf8,100:7dd3fc&height=220&section=header&text=App%20Network%20Controller&fontSize=50&fontColor=ffffff&fontAlignY=35&desc=Block%20Apps%20From%20Internet%20%E2%80%A2%20WPF%20Dark%20GUI%20%E2%80%A2%20Windows%20Firewall&descAlignY=55&descAlign=50)
 
-[![Version](https://img.shields.io/badge/Version-2.0-0ea5e9?style=for-the-badge)](https://github.com/F2lcon01/Block-apps-internet)
+[![Version](https://img.shields.io/badge/Version-2.5-0ea5e9?style=for-the-badge)](https://github.com/F2lcon01/Block-apps-internet)
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1+-5391FE?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com/F2lcon01/Block-apps-internet)
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/F2lcon01/Block-apps-internet)
 [![WPF](https://img.shields.io/badge/GUI-WPF%20Dark%20Theme-38bdf8?style=for-the-badge)](https://github.com/F2lcon01/Block-apps-internet)
@@ -48,7 +48,7 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 ```
   +---------------------------------------------------------------+
   |                                                                 |
-  |   App Network Controller v2.0                                   |
+  |   App Network Controller v2.5                                   |
   |                                                                 |
   |   [+] حظر البرامج من الانترنت بنقرة واحدة                      |
   |   [+] واجهة رسومية حديثة (Dark Theme)                           |
@@ -65,6 +65,19 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 
 ---
 
+## الجديد في v2.5
+
+| التحسين | التفاصيل |
+|---------|----------|
+| **اداء اسرع 5x** | استبدال Get-NetFirewallRule بـ COM API (HNetCfg.FwPolicy2) |
+| **ذاكرة اقل** | VirtualizingStackPanel + ArrayList بدل array concatenation |
+| **حظر جماعي** | زر "Block All Non-System" لحظر كل البرامج دفعة واحدة |
+| **توافق افضل** | حذف Emoji واستبدالها بنص عادي - يعمل على كل الانظمة |
+| **بدء اسرع** | حذف P/Invoke غير ضروري + تنظيف XAML |
+| **كود انظف** | حذف Styles غير مستخدمة + تحسين هيكل الكود |
+
+---
+
 ## المميزات
 
 ---
@@ -77,6 +90,7 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 - **كلك يمين** = قائمة الخيارات
 - **خانة البحث** = فلترة فورية بالاسم او المسار
 - **Refresh** = تحديث القائمة
+- **Block All Non-System** = حظر كل البرامج غير النظامية دفعة واحدة
 
 > [!NOTE]
 > البرامج النظامية مثل `svchost` و `explorer` و `lsass` محمية ولا يمكن حظرها.
@@ -130,7 +144,7 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 كل عملية حظر او الغاء حظر تسجل مع الوقت والتاريخ:
 
 ```
-[2026-04-08 05:51:02] === App Network Controller v2.0 started ===
+[2026-04-08 05:51:02] === App Network Controller v2.5 started ===
 [2026-04-08 05:51:15] BLOCKED | chrome | C:\...\chrome.exe
 [2026-04-08 05:52:03] UNBLOCKED | chrome | 2 rules
 [2026-04-08 05:53:00] EXPORTED | 4 rules to backup.json
@@ -176,7 +190,7 @@ powershell -ExecutionPolicy Bypass -File "AppNetworkController.ps1"
 
 ```
   +---------------+----------------------------------------------+
-  |  App Network Controller v2.0                      [*] Ready  |
+  |  App Network Controller v2.5                      [*] Ready  |
   +---------------+----------------------------------------------+
   |               |                                              |
   |  Running Apps |     [ محتوى القسم المختار ]                  |
@@ -297,7 +311,7 @@ graph TD
 
 <div align="center">
 
-**App Network Controller v2.0**
+**App Network Controller v2.5**
 
 [![GitHub](https://img.shields.io/badge/GitHub-F2lcon01-1e3a5f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/F2lcon01)
 
